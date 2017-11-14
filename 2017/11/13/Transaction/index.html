@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Notes">
 <meta property="og:description" content="Lock-Free Distributed Transactions支持两种隔离级别：snapshot isolation and serializable snapshot isolation.SI 更易实现，有高性能，少量的异常情况（如 write skew）。SSI 更复杂，存在争议的高性能，没有异常情况。SSI 是默认级别。在低并发系统，SSI 没有锁和额外的写，具有和 SI 相似的性能。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2017-11-14T08:45:04.641Z">
+<meta property="og:updated_time" content="2017-11-14T08:48:39.757Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Transaction">
 <meta name="twitter:description" content="Lock-Free Distributed Transactions支持两种隔离级别：snapshot isolation and serializable snapshot isolation.SI 更易实现，有高性能，少量的异常情况（如 write skew）。SSI 更复杂，存在争议的高性能，没有异常情况。SSI 是默认级别。在低并发系统，SSI 没有锁和额外的写，具有和 SI 相似的性能。">
@@ -304,14 +304,16 @@
 <h3 id="Transaction-execution-flow"><a href="#Transaction-execution-flow" class="headerlink" title="Transaction execution flow"></a>Transaction execution flow</h3><p>事务执行分为两个阶段：</p>
 <ul>
 <li>选择一个有可能在事务中积极参与的range，在range保留区写上一个状态为PENDING的事务记录，开始事务。同时并发为每个将要被写的数据写一个intent值。用一个额外的标记（如intent）标识可能在事务本身提交后被提交的值。另外，事务id也会与这些intent值保存在一起。当两个有相同时间戳的事务发生冲突时，事务id被用来进行决策。每个node返回用来写的时间戳（在没有读写冲突下的原始候选时间戳），客户端选择一个最大的时间戳作为最终提交时间戳。</li>
-<li>更新transaction record，提交事务。commit entry的值包含候选时间戳。事务已经被认为完全提交。<br>对于SI事务，增加时间戳来适应并发读是完全可以接受的。但是对SSI事务来说，候选与提交时间戳之间的差异需要事务重新开始。<br>事务提交后，所有written intents并发移除intent标记，事务在这一步之前就已经被认为提交完成，不需要等待return control至transaction coordinator。<br>以上是没有冲突的情况。</li>
+<li>更新transaction record，提交事务。commit entry的值包含候选时间戳。事务已经被认为完全提交。<br>对于SI事务，增加时间戳来适应并发读是完全可以接受的。但是对SSI事务来说，候选与提交时间戳之间的差异需要事务重新开始。<br>事务提交后，所有written intents并发移除intent标记，事务在这一步之前就已经被认为提交完成，不需要等待return control至transaction coordinator。</li>
 </ul>
+<p>以上是没有冲突的情况。</p>
 <h3 id="Conflict-Resolution"><a href="#Conflict-Resolution" class="headerlink" title="Conflict Resolution"></a>Conflict Resolution</h3><p>当读写者在一条intent record或者一条需要读写的newly-commiteed value上产生冲突时，事务会根据冲突类型来中断或者重新开始。</p>
 <h4 id="Transaction-restart"><a href="#Transaction-restart" class="headerlink" title="Transaction restart"></a>Transaction restart</h4><p>归纳为两种情况：</p>
 <ul>
 <li>SSI事务尝试以一个已经被推移的时间戳提交。（An SSI transaction that finds upon attempting to commit that its commit timestamp has been pushed. ）</li>
-<li>事务的读或者写遭遇需要冲突处理的数据。（The second case involves a transaction actively encountering a conflict, that is, one of its readers or writers encounter data that necessitate conflict resolution (see transaction interactions below).）<br>事务重新开始时，修改优先级，可能更新时间戳，使用相同的事务id。事务的前一次执行可能写入一些wirte intents，这些需要在事务提交前被清理，这些不包括在事务里面。这些旧的write intent清理工作或者通过写入新的intents隐式进行，或者显式清理旧的intents。因为大多数都是写相同的keys，在提交之前显式清理通常都是空操作。</li>
+<li>事务的读或者写遭遇需要冲突处理的数据。（The second case involves a transaction actively encountering a conflict, that is, one of its readers or writers encounter data that necessitate conflict resolution (see transaction interactions below).）</li>
 </ul>
+<p>事务重新开始时，修改优先级，可能更新时间戳，使用相同的事务id。事务的前一次执行可能写入一些wirte intents，这些需要在事务提交前被清理，这些不包括在事务里面。这些旧的write intent清理工作或者通过写入新的intents隐式进行，或者显式清理旧的intents。因为大多数都是写相同的keys，在提交之前显式清理通常都是空操作。</p>
 <h4 id="Transaction-abort"><a href="#Transaction-abort" class="headerlink" title="Transaction abort"></a>Transaction abort</h4><p>This is the case in which a transaction, upon reading its transaction record, finds that it has been aborted. In this case, the transaction can not reuse its intents; it returns control to the client before cleaning them up (other readers and writers would clean up dangling intents as they encounter them) but will make an effort to clean up after itself. The next attempt (if applicable) then runs as a new transaction with a new txn id.</p>
 <h4 id="Transaction-interactions"><a href="#Transaction-interactions" class="headerlink" title="Transaction interactions"></a>Transaction interactions</h4>
       
