@@ -79,19 +79,17 @@
 
 
 
-<meta name="description" content="Test picture. Pic TestAdd a pic.OK.  More info: Writing">
+<meta name="description" content="Lock-Free Distributed Transactions  支持两种隔离级别：  snapshot isolation and serializable snapshot isolation.  SI 更易实现，有高性能，少量的异常情况（如 write skew）。SSI 更复杂，存在争议的高性能，没有异常情况。  SSI 是默认级别。在低并发系统，SSI 没有锁和额外的写，具有和 S">
 <meta property="og:type" content="article">
-<meta property="og:title" content="pic_test">
-<meta property="og:url" content="http://yoursite.com/2017/10/27/pic-test/index.html">
+<meta property="og:title" content="Transaction">
+<meta property="og:url" content="https://yuhit.github.io/2017/11/13/Transaction/index.html">
 <meta property="og:site_name" content="Notes">
-<meta property="og:description" content="Test picture. Pic TestAdd a pic.OK.  More info: Writing">
+<meta property="og:description" content="Lock-Free Distributed Transactions  支持两种隔离级别：  snapshot isolation and serializable snapshot isolation.  SI 更易实现，有高性能，少量的异常情况（如 write skew）。SSI 更复杂，存在争议的高性能，没有异常情况。  SSI 是默认级别。在低并发系统，SSI 没有锁和额外的写，具有和 S">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/2017/10/27/pic-test/webwxgeticon.jpeg">
-<meta property="og:updated_time" content="2017-10-27T08:10:25.000Z">
+<meta property="og:updated_time" content="2017-11-14T08:21:01.893Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="pic_test">
-<meta name="twitter:description" content="Test picture. Pic TestAdd a pic.OK.  More info: Writing">
-<meta name="twitter:image" content="http://yoursite.com/2017/10/27/pic-test/webwxgeticon.jpeg">
+<meta name="twitter:title" content="Transaction">
+<meta name="twitter:description" content="Lock-Free Distributed Transactions  支持两种隔离级别：  snapshot isolation and serializable snapshot isolation.  SI 更易实现，有高性能，少量的异常情况（如 write skew）。SSI 更复杂，存在争议的高性能，没有异常情况。  SSI 是默认级别。在低并发系统，SSI 没有锁和额外的写，具有和 S">
 
 
 
@@ -121,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/10/27/pic-test/"/>
+  <link rel="canonical" href="https://yuhit.github.io/2017/11/13/Transaction/"/>
 
 
 
 
 
-  <title>pic_test | Notes</title>
+  <title>Transaction | Notes</title>
   
 
 
@@ -234,7 +232,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/27/pic-test/">
+    <link itemprop="mainEntityOfPage" href="https://yuhit.github.io/2017/11/13/Transaction/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="LongYu">
@@ -251,7 +249,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">pic_test</h1>
+          <h1 class="post-title" itemprop="name headline">Transaction</h1>
         
 
         <div class="post-meta">
@@ -263,8 +261,8 @@
               
                 <span class="post-meta-item-text">Veröffentlicht am</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-27T16:12:13+08:00">
-                2017-10-27
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-13T10:34:24+08:00">
+                2017-11-13
               </time>
             
 
@@ -301,11 +299,13 @@
       
 
       
-        <p>Test picture.</p>
-<h2 id="Pic-Test"><a href="#Pic-Test" class="headerlink" title="Pic Test"></a>Pic Test</h2><h3 id="Add-a-pic"><a href="#Add-a-pic" class="headerlink" title="Add a pic."></a>Add a pic.</h3><p>OK.</p>
-<p><img src="/2017/10/27/pic-test/webwxgeticon.jpeg" alt="pic-test"></p>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-
+        <h2 id="Lock-Free-Distributed-Transactions"><a href="#Lock-Free-Distributed-Transactions" class="headerlink" title="Lock-Free Distributed Transactions"></a>Lock-Free Distributed Transactions</h2><p>  支持两种隔离级别：<br>  snapshot isolation and serializable snapshot isolation.<br>  SI 更易实现，有高性能，少量的异常情况（如 write skew）。SSI 更复杂，存在争议的高性能，没有异常情况。<br>  SSI 是默认级别。在低并发系统，SSI 没有锁和额外的写，具有和 SI 相似的性能。在高并发系统，仍然无锁，但是会导致更多事务失败退出。<br>  SI 和 SSI 都必须保证读的结果是被保护的，如具有比一个读操作更低时间戳的写操作是不会成功的。为了达到这个目的，每个 range 在内存中保存一个从 key range 到读最新时间戳的边界值。<br>  Most updates to this timestamp cache correspond to keys being read, though the timestamp cache also protects the outcome of some writes (notably range deletions) which consequently must also populate the cache. The cache’s entries are evicted oldest timestamp first, updating the low water mark of the cache appropriately.<br>  每个事务在开始时会分配一个随机的优先级和一个候选时间戳。候选时间戳是暂定的在这个时间事务将会被提交，而且被选为节点协调事务的当前锁事件。这意味着一个没有冲突事务以这个事务的实际工作完成之前的一个时间戳来进行提交。<br>  SI允许事务的候选时间戳增加而SSI不会。</p>
+<h3 id="Hybrid-Logical-Clock"><a href="#Hybrid-Logical-Clock" class="headerlink" title="Hybrid Logical Clock"></a>Hybrid Logical Clock</h3><p>  每个节点包含一个 HLC。<br>  Cockroach picks a Timestamp for a transaction using HLC time.<br>  HLC 会被节点上的每个读写事件更新，HLC time &gt;= wall time。从其他节点上获取的cockroach请求中的时间戳不仅用来标识操作的版本，并且会用来更新节点上的HLC。从而保证节点上的所有数据读写事件戳小于下一个HLC时间。</p>
+<h3 id="Transaction-execution-flow"><a href="#Transaction-execution-flow" class="headerlink" title="Transaction execution flow"></a>Transaction execution flow</h3><p>   事务执行分为两个阶段：<br>   1.选择一个有可能在事务中积极参与的range，在range保留区写上一个状态为PENDING的事务记录，开始事务。同时并发为每个将要被写的数据写一个intent值。用一个额外的标记（如intent）标识可能在事务本身提交后被提交的值。另外，事务id也会与这些intent值保存在一起。当两个有相同时间戳的事务发生冲突时，事务id被用来进行决策。每个node返回用来写的时间戳（在没有读写冲突下的原始候选时间戳），客户端选择一个最大的时间戳作为最终提交时间戳。<br>   2.更新transaction record，提交事务。commit entry的值包含候选时间戳。事务已经被认为完全提交。<br>     对于SI事务，增加时间戳来适应并发读是完全可以接受的。但是对SSI事务来说，候选与提交时间戳之间的差异需要事务重新开始。<br>     事务提交后，所有written intents并发移除intent标记，事务在这一步之前就已经被认为提交完成，不需要等待return control至transaction coordinator。<br>   以上是没有冲突的情况。</p>
+<h3 id="Conflict-Resolution"><a href="#Conflict-Resolution" class="headerlink" title="Conflict Resolution"></a>Conflict Resolution</h3><p>  当读写者在一条intent record或者一条需要读写的newly-commiteed value上产生冲突时，事务会根据冲突类型来中断或者重新开始。</p>
+<h4 id="Transaction-restart"><a href="#Transaction-restart" class="headerlink" title="Transaction restart"></a>Transaction restart</h4><p>  归纳为两种情况：<br>  1.SSI事务尝试以一个已经被推移的时间戳提交。（An SSI transaction that finds upon attempting to commit that its commit timestamp has been pushed. ）<br>  2.事务的读或者写遭遇需要冲突处理的数据。（The second case involves a transaction actively encountering a conflict, that is, one of its readers or writers encounter data that necessitate conflict resolution (see transaction interactions below).）<br>  事务重新开始时，修改优先级，可能更新时间戳，使用相同的事务id。事务的前一次执行可能写入一些wirte intents，这些需要在事务提交前被清理，这些不包括在事务里面。这些旧的write intent清理工作或者通过写入新的intents隐式进行，或者显式清理旧的intents。因为大多数都是写相同的keys，在提交之前显式清理通常都是空操作。</p>
+<h4 id="Transaction-abort"><a href="#Transaction-abort" class="headerlink" title="Transaction abort"></a>Transaction abort</h4><p>  This is the case in which a transaction, upon reading its transaction record, finds that it has been aborted. In this case, the transaction can not reuse its intents; it returns control to the client before cleaning them up (other readers and writers would clean up dangling intents as they encounter them) but will make an effort to clean up after itself. The next attempt (if applicable) then runs as a new transaction with a new txn id.</p>
+<h4 id="Transaction-interactions"><a href="#Transaction-interactions" class="headerlink" title="Transaction interactions"></a>Transaction interactions</h4>
       
     </div>
     
@@ -453,7 +453,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pic-Test"><span class="nav-number">1.</span> <span class="nav-text">Pic Test</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Add-a-pic"><span class="nav-number">1.1.</span> <span class="nav-text">Add a pic.</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Lock-Free-Distributed-Transactions"><span class="nav-number">1.</span> <span class="nav-text">Lock-Free Distributed Transactions</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hybrid-Logical-Clock"><span class="nav-number">1.1.</span> <span class="nav-text">Hybrid Logical Clock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Transaction-execution-flow"><span class="nav-number">1.2.</span> <span class="nav-text">Transaction execution flow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Conflict-Resolution"><span class="nav-number">1.3.</span> <span class="nav-text">Conflict Resolution</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Transaction-restart"><span class="nav-number">1.3.1.</span> <span class="nav-text">Transaction restart</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Transaction-abort"><span class="nav-number">1.3.2.</span> <span class="nav-text">Transaction abort</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Transaction-interactions"><span class="nav-number">1.3.3.</span> <span class="nav-text">Transaction interactions</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -651,6 +651,8 @@
   
 
   
+  
+
 
   
 
